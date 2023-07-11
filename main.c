@@ -4,13 +4,13 @@
 
 void initialize_disk();
 int create_file(char *filename, char *content);
-void read_file(char* filename, char* buffer, int size);
+int read_file(char* filename, char* buffer, int size);
 
 
 #define BLOCK_SIZE 129
 #define MAX_FILENAME 20
 #define NUM_BLOCKS 3000
-#define min(a,b) ((a) < (b) ? (a) : (b));
+#define min(a,b) ((a) < (b) ? (a) : (b))
 
 
 typedef struct {
@@ -27,11 +27,11 @@ int main(){
 
 
     char note[40]  = "things fall apart";
-    char content[100]  = "things are never the same if they are not used the way they should but thats fine, as you were";
+    char content[2000]  = "things are never the same if they are not used the way they should but thats fine, as you were until they dont anymoore but that doesnt bother me or does it i would know, how dare you say that youre so mean and i literally hate you, oh what do you mean you hate me i hate you more oh shut up that not even true of it it, stop talk";
 
     // char buffer[1024];
-    int size = 1000;
-
+    int size = 2000;
+    printf("%s content\n", content);
     initialize_disk();
     int first = create_file(note, content);
     printf("%i from create\n", first);
@@ -40,9 +40,9 @@ int main(){
         printf("Failed to allocate memory for buffer\n");
     return 1;
     }
-    // printf("%s buffer before initialized\n", buffer);
-    read_file(note, buffer, size );
 
+    read_file(note, buffer, size );
+    free(buffer);
     // printf("%s", buffer);
     // printf("%s from main\n", disk[0].content);
     // printf("%s from main\n", disk[0].filename);
@@ -88,10 +88,13 @@ int create_file(char *filename, char *content){
     return -1;
 }
 
-void read_file(char* filename, char* buffer, int size){
+ read_file(char* filename, char* buffer, int size){
     int i;
+
+    int bytes_read;
     printf("%s\n", filename);
     printf("%s filename from disk\n", disk[0].filename);
+    printf("%s content from disk one\n", disk[1].content);
     for(i = 0; i < NUM_BLOCKS; i++){
         //find the first block of the file
         // printf("%s here", disk[i].filename);
@@ -99,18 +102,19 @@ void read_file(char* filename, char* buffer, int size){
             //copy the found file into the buffer with the required size
             strncpy(buffer, disk[i].content, size);
             //get the min size between the data and size 
-            int bytes_read = min(strlen(disk[i].content),size);
+             bytes_read = min(strlen(disk[i].content),size);
             //subtract the  bytes read from the size
             size -= bytes_read;
             //move the buffer to the away from the file that was read
-            // buffer += bytes_read;
-            printf("%i size\n", size);
-            printf("%i bytes_read\n", bytes_read);
-            printf("%s buffer", buffer);
+            buffer += bytes_read;
+            // printf("%i size\n", size);
+            // printf("%i bytes_read\n", bytes_read);
+            // printf("%s buffer", buffer);
             //follow the next step links to read the rest of the file 
             int next = disk[i].next_block;
-
+            
             while(next != -1 && size > 0){
+            printf("%i", next);
             strncpy(buffer, disk[next].content, size);
             //get the min size between the data and size 
             int bytes_read = min(strlen(disk[next].content),size);
@@ -122,12 +126,13 @@ void read_file(char* filename, char* buffer, int size){
             //follow the next step links to read the rest of the file 
             int next = disk[next].next_block;  
             }
+            // printf("%s buffer after while statement", buffer);
             return; //total number of bytes read 
         }
         
     }
     // printf("file here\n");
-    printf("%s here\n", disk[0].filename);
+  return bytes_read;
     // return buffer;
 }
 
